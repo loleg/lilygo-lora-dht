@@ -25,7 +25,9 @@
 
 DHT_Unified dht(DHTPIN, DHTTYPE);
 
-uint32_t delayMS = 15 * 1000;
+uint32_t delayMS = 10 * 100;
+uint32_t delayCycles = 500 * 1000;
+uint32_t delayCounter = 0;
 
 void setup() {
   // Default Serial 115200
@@ -59,13 +61,21 @@ void setup() {
   Serial.print  (F("Resolution:  ")); Serial.print(sensor.resolution); Serial.println(F("%"));
   Serial.println(F("------------------------------------"));
   // Set delay between sensor readings based on sensor details.
-  delayMS = sensor.min_delay / 1000;
+  //delayMS = sensor.min_delay / 1000;
 }
 
+float dht_temperature = 0.0;
+float dht_humidity = 0.0;
+
 void loop() {
-  loopLMIC();
-  // Delay between measurements.
+  loopLMIC(dht_temperature, dht_humidity);
+
+  // Take sensor measurements every so often
+  delayCounter++;
+  if (delayCounter < delayCycles) return;
   delay(delayMS);
+  delayCounter = 0;
+
   // Get temperature event and print its value.
   sensors_event_t event;
   dht.temperature().getEvent(&event);
@@ -76,6 +86,7 @@ void loop() {
     Serial.print(F("Temperature: "));
     Serial.print(event.temperature);
     Serial.print(F("°C"));
+    dht_temperature = event.temperature;
   }
   // Get humidity event and print its value.
   dht.humidity().getEvent(&event);
@@ -86,5 +97,6 @@ void loop() {
     Serial.print(F("  Humidity: "));
     Serial.print(event.relative_humidity);
     Serial.println(F("%"));
+    dht_humidity = event.relative_humidity;
   }
 }

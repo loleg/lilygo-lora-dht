@@ -4,6 +4,6 @@
 
 
 void setupLMIC(void);
-void loopLMIC(void);
+void loopLMIC(float, float);
 
 
